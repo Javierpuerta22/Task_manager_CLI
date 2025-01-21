@@ -3,9 +3,9 @@ from termcolor import colored
 
 class Task:
     def __init__(self, task_group, task_name, task_description, task_status, task_created:dt.datetime = None):
-        self.task_group = task_group
-        self.task_name = task_name
-        self.task_description = task_description
+        self.task_group = task_group.capitalize()
+        self.task_name = task_name.capitalize()
+        self.task_description = task_description.capitalize()
         self.task_status = task_status.capitalize()
         self.task_created = dt.datetime.fromisoformat(task_created) if task_created else dt.datetime.now()
         self.task_status_color = {'To do': 'red', 'Doing': 'yellow', 'Done': 'green'}
@@ -26,6 +26,6 @@ class Task:
         }
         
         
-    def to_print(self):
-        print(f"{self.task_group:<15} | {self.task_name:<20} | {self.task_description:<30} | {colored(self.task_status, self.task_status_color[self.task_status])} | {colored(self.task_created.strftime('%Y-%m-%d %H:%M:%S'), 'light_green'):<20} |")
+    def to_print(self, max_length:int):
+        print(f"{self.task_group:<15} | {self.task_name:<20} | {self.task_description:<{max_length}} | {colored(self.task_status, self.task_status_color[self.task_status])} | {colored(self.task_created.strftime('%Y-%m-%d %H:%M:%S'), 'light_green'):<20} |")
     
