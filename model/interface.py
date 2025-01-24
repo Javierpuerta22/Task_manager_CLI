@@ -8,17 +8,21 @@ class Interface(cmd.Cmd):
     def __init__(self):
         super().__init__()
         
+        self.data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+        self.task_list_path = os.path.join(self.data_path, 'task_list.json')
+        """# Crear el directorio 'data' si no existe
+        if not os.path.exists(self.data_path):
+            os.makedirs(self.data_path)
         # Initialize the task list if it doesnt exist the file task_list.json in the data folder
-        if not os.path.exists('data/task_list.json'):
-            with open('data/task_list.json', 'w') as file:
-                file.write('{"tasks": []}')
-                
+        if not os.path.exists(self.task_list_path):
+            with open(self.task_list_path, 'w') as file:
+                file.write('{"tasks": []}')"""
+                                
         # Load the task list from the file task_list.json
-        with open('data/task_list.json', 'r') as file:
+        with open(self.task_list_path, 'r') as file:
             self.task_list = json.load(file)
             
-        self.actual_path = []
-            
+        self.actual_path = []            
     
     def do_list(self, line):
         """List all tasks."""
@@ -49,16 +53,29 @@ class Interface(cmd.Cmd):
         line = shlex.split(line)
         self.task_list['tasks'].append(Task(*line).to_dict())
         
-        with open('data/task_list.json', 'w') as file:
+        with open(self.task_list_path, 'w') as file:
             json.dump(self.task_list, file)
+            
+        self.do_list("")
             
     def do_done(self, line):
         """Mark a task as done."""
         task_name = line.capitalize()
         task = next(filter(lambda task: task['task_name'] == task_name, self.task_list['tasks']), None)
+        
+        # we update the task status to 'Doing'
+        task['task_status'] = 'Done'
+        
+        # we update the task in the task list
+        for i, t in enumerate(self.task_list['tasks']):
+            if t['task_name'] == task_name:
+                self.task_list['tasks'][i] = task
+                break
                 
-        with open('data/task_list.json', 'w') as file:
+        with open(self.task_list_path, 'w') as file:
             json.dump(self.task_list, file)
+            
+        self.do_list("")
             
             
     def do_delete(self, line:str):
@@ -66,8 +83,11 @@ class Interface(cmd.Cmd):
         task_name = line.capitalize()
         self.task_list['tasks'] = list(filter(lambda task: task['task_name'] != task_name, self.task_list['tasks']))
         
-        with open('data/task_list.json', 'w') as file:
+        with open(self.task_list_path, 'w') as file:
             json.dump(self.task_list, file)
+        
+        self.do_list("")
+
             
             
     def do_doing(self, line):
@@ -85,9 +105,10 @@ class Interface(cmd.Cmd):
                 break
     
                 
-        with open('data/task_list.json', 'w') as file:
+        with open(self.task_list_path, 'w') as file:
             json.dump(self.task_list, file)
             
+        self.do_list("")
 
     def do_exit(self, line):
         """Exit the CLI."""
